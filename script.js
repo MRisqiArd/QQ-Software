@@ -1,12 +1,18 @@
 (() => {
   'use strict';
 
-  // ====== KONFIGURASI: nomor WhatsApp QQ Software (format 62, tanpa + atau 0) ======
-  const WHATSAPP_NUMBER = '6281325823911';
+  // ====== KONFIGURASI: nomor WhatsApp QQ Software ======
+  // Nomor tidak disimpan dalam bentuk teks polos supaya tidak langsung terbaca
+  // lewat "View Page Source" atau pembaca kode otomatis. Disusun ulang saat halaman dimuat.
+  const _p = ['==QM4IjN', '==AO1IzM', '=ETM5MjM'];
+  const WHATSAPP_NUMBER = _p
+    .map((s) => atob(s.split('').reverse().join('')))
+    .join('');
 
   // Buka WhatsApp dengan cara yang lebih andal di HP (lebih tahan pop-up blocker)
+  const buildWaUrl = (text) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
   const openWhatsApp = (text) => {
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+    const url = buildWaUrl(text);
     const a = document.createElement('a');
     a.href = url;
     a.target = '_blank';
@@ -134,11 +140,15 @@
     form.reset();
   });
 
-  // Tombol WA cepat (hero & tombol melayang): langsung kirim template pesan
-  $$('[data-wa-template]').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
+  // Tombol WA cepat (hero, footer, tombol melayang): isi href asli saat halaman dimuat
+  // dan buka lewat template pesan saat diklik.
+  $$('.wa-link').forEach((el) => {
+    const text = el.dataset.waTemplate || 'Halo QQ Software, saya ingin bertanya mengenai layanan Anda.';
+    el.href = buildWaUrl(text);
+    el.target = '_blank';
+    el.addEventListener('click', (e) => {
       e.preventDefault();
-      openWhatsApp(btn.dataset.waTemplate);
+      openWhatsApp(text);
     });
   });
 })();
